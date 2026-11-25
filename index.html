@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>BON SYSTEM - LC79</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #eef9ff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; -webkit-font-smoothing: antialiased; }
+  iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: none; z-index: 0; }
+  .key-screen { position: fixed; inset: 0; background: #eef9ff; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease, visibility 0.4s ease; padding: 20px; background-image: linear-gradient(rgba(186, 230, 253, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(186, 230, 253, 0.5) 1px, transparent 1px); background-size: 40px 40px; }
+  .key-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+  .key-card { background: #ffffff; width: 100%; max-width: 380px; border-radius: 30px; padding: 30px 20px; box-shadow: 0 10px 40px rgba(14, 165, 233, 0.15); text-align: center; position: relative; animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+  .logo-drop { width: 80px; height: 80px; margin: 0 auto 15px; position: relative; display: flex; align-items: center; justify-content: center; }
+  .logo-drop svg { width: 100%; height: 100%; filter: drop-shadow(0 5px 10px rgba(14, 165, 233, 0.3)); }
+  .brand-text { font-size: 12px; font-weight: 700; color: #0ea5e9; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+  .key-card h1 { color: #0f172a; font-size: 28px; font-weight: 800; line-height: 1.2; margin-bottom: 10px; }
+  .key-card h1 span { color: #0ea5e9; display: block; }
+  .sub-text { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+  .input-label { text-align: left; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 8px; margin-left: 5px; }
+  .input-group { position: relative; margin-bottom: 15px; }
+  .input-group input { width: 100%; padding: 16px 90px 16px 20px; border-radius: 16px; border: 2px solid #e2e8f0; background: #f8fafc; color: #0f172a; font-size: 15px; font-weight: 600; outline: none; transition: all 0.2s; letter-spacing: 0.5px; }
+  .input-group input::placeholder { color: #94a3b8; font-weight: 500; }
+  .input-group input:focus { border-color: #0ea5e9; background: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+  .btn-paste { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #eff6ff; color: #0ea5e9; border: none; padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+  .btn-paste:hover { background: #dbeafe; }
+  .btn-paste svg { width: 14px; height: 14px; fill: currentColor; }
+  .btn-submit { width: 100%; padding: 16px; border-radius: 16px; border: none; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 20px rgba(14, 165, 233, 0.3); display: flex; align-items: center; justify-content: space-between; padding-left: 25px; padding-right: 15px; transition: all 0.2s; margin-bottom: 25px; }
+  .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(14, 165, 233, 0.4); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.7; cursor: wait; }
+  .arrow-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .vip-table { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 15px; margin-bottom: 20px; }
+  .vip-title { font-size: 12px; font-weight: 800; color: #0ea5e9; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; }
+  .vip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .vip-item { background: #fff; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: #334155; }
+  .vip-price { color: #f97316; font-weight: 800; }
+  .steps { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 20px; font-size: 12px; color: #94a3b8; font-weight: 600; }
+  .step-item.active { color: #0f172a; display: flex; align-items: center; gap: 5px; }
+  .step-num { width: 20px; height: 20px; border: 1.5px solid #cbd5e1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; }
+  .step-item.active .step-num { border-color: #0ea5e9; color: #0ea5e9; background: #eff6ff; }
+  .step-line { width: 20px; height: 1px; background: #cbd5e1; }
+  .footer-link { font-size: 13px; color: #64748b; }
+  .footer-link a { color: #0ea5e9; font-weight: 700; text-decoration: none; }
+  .msg-box { font-size: 13px; font-weight: 600; min-height: 20px; margin-bottom: 10px; text-align: center; }
+  .msg-error { color: #ef4444; }
+  .msg-success { color: #22c55e; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ROBOT WIDGET */
+  .robot-container { position: fixed; top: 80px; left: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+  .robot-widget { position: relative; display: flex; align-items: flex-start; cursor: grab; user-select: none; touch-action: none; transform-origin: center center; }
+  .robot-widget:active { cursor: grabbing; }
+  .robot-character { position: relative; width: 86px; height: 112px; z-index: 10; flex-shrink: 0; animation: robotHover 3s ease-in-out infinite; filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55)); }
+  @keyframes robotHover { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-4px); } }
+  .robot-ear { position: absolute; top: 22px; width: 14px; height: 18px; background: radial-gradient(circle at 30% 30%, #ffffff 0%, #d8dee9 100%); border-radius: 50%; box-shadow: inset -2px -2px 4px rgba(0, 0, 0, 0.15); z-index: 1; }
+  .robot-ear.left { left: 4px; } .robot-ear.right { right: 4px; }
+  .robot-head { position: absolute; top: 4px; left: 10px; width: 66px; height: 52px; background: radial-gradient(circle at 35% 22%, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%); border-radius: 34px 34px 28px 28px; box-shadow: inset -3px -5px 9px rgba(15, 23, 42, 0.18), inset 3px 4px 8px rgba(255, 255, 255, 1); display: flex; align-items: center; justify-content: center; z-index: 3; }
+  .robot-visor { width: 50px; height: 25px; background: #0d131a; border-radius: 13px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.9), 0 1px 1px rgba(255, 255, 255, 0.6); }
+  .robot-visor svg { width: 26px; height: 26px; z-index: 2; animation: bearBlink 4s infinite; }
+  @keyframes bearBlink { 0%, 90%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.8); } }
+  .robot-neck { position: absolute; top: 52px; left: 26px; width: 34px; height: 8px; background: #334155; border-radius: 50%; z-index: 2; }
+  .robot-body { position: absolute; top: 55px; left: 19px; width: 48px; height: 46px; background: radial-gradient(circle at 38% 25%, #ffffff 0%, #f1f5f9 65%, #cbd5e1 100%); border-radius: 20px 20px 26px 26px; box-shadow: inset -4px -6px 10px rgba(15, 23, 42, 0.18), inset 3px 3px 6px rgba(255, 255, 255, 0.95); z-index: 2; }
+  .robot-arm-right { position: absolute; top: 58px; left: 8px; width: 14px; height: 31px; background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%); border-radius: 12px 4px 12px 14px; transform-origin: top center; box-shadow: -2px 3px 6px rgba(0, 0, 0, 0.25), inset 2px 2px 4px #ffffff; z-index: 4; animation: rightArmMove 1.8s ease-in-out infinite; }
+  @keyframes rightArmMove { 0%, 100% { transform: rotate(14deg) translateY(0px); } 50% { transform: rotate(34deg) translateY(-2px); } }
+  .robot-arm-left { position: absolute; top: 60px; right: -4px; width: 24px; height: 14px; background: linear-gradient(180deg, #ffffff 0%, #cbd5e1 100%); border-radius: 8px 12px 12px 8px; transform: rotate(-12deg); box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.3), inset 1px 2px 3px #ffffff; z-index: 12; }
+  .glass-board { position: relative; margin-left: -2px; margin-top: 2px; width: 250px; min-height: 110px; padding: 24px 24px 24px 26px; background: linear-gradient(135deg, rgba(120, 95, 85, 0.55) 0%, rgba(65, 45, 40, 0.62) 100%); backdrop-filter: blur(16px) saturate(1.4); -webkit-backdrop-filter: blur(16px) saturate(1.4); border-radius: 26px; border: 1.5px solid rgba(255, 255, 255, 0.35); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.45), inset -1px -1px 2px rgba(255, 255, 255, 0.2); display: flex; flex-direction: column; justify-content: center; gap: 12px; z-index: 5; }
+  .rotate-btn { position: absolute; top: 8px; right: 10px; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, 0.15); border: 1.5px solid rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.95); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .rotate-btn:hover { background: rgba(255, 255, 255, 0.35); transform: rotate(90deg); }
+  .board-phien { font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.4px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 8px rgba(0, 0, 0, 0.3); }
+  .board-du-doan { font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.4px; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 8px rgba(0, 0, 0, 0.3); }
+  .board-du-doan span { font-weight: 800; text-transform: uppercase; color: #38f8b8; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 10px rgba(56, 248, 184, 0.35); }
+  #widget2 .board-du-doan span { color: #fbbf24; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 10px rgba(251, 191, 36, 0.4); }
+</style>
+</head>
+<body>
+
+<iframe id="gameFrame" src="https://lc79.bet" style="display:none;"></iframe>
+
+<!-- MÀN HÌNH NHẬP KEY -->
+<div class="key-screen" id="keyScreen">
+  <div class="key-card">
+    <div class="logo-drop">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="25" cy="25" r="18" fill="#0ea5e9"/>
+        <circle cx="75" cy="25" r="18" fill="#0ea5e9"/>
+        <circle cx="50" cy="55" r="40" fill="#38bdf8"/>
+        <ellipse cx="50" cy="65" rx="18" ry="12" fill="#e0f2fe"/>
+        <circle cx="35" cy="48" r="5" fill="#0f172a"/>
+        <circle cx="65" cy="48" r="5" fill="#0f172a"/>
+        <ellipse cx="50" cy="60" rx="4" ry="3" fill="#0f172a"/>
+        <path d="M42 68 Q50 75 58 68" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="28" cy="62" r="5" fill="#fca5a5" opacity="0.6"/>
+        <circle cx="72" cy="62" r="5" fill="#fca5a5" opacity="0.6"/>
+      </svg>
+    </div>
+
+    <div class="brand-text">BON SYSTEM • LC79</div>
+    <h1>Mở khóa<br><span>cuộc chơi.</span></h1>
+    <p class="sub-text">Nhập key để tiếp tục vào LC79.</p>
+
+    <div class="input-label">MÃ TRUY CẬP</div>
+    <div class="input-group">
+      <input type="text" id="keyInput" placeholder="BON-XXXX-XXXX-XXXX" autocomplete="off">
+      <button class="btn-paste" id="pasteBtn" type="button">
+        <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+        Dán
+      </button>
+    </div>
+
+    <button class="btn-submit" id="keySubmitBtn">
+      <span id="submitText">VÀO HỆ THỐNG</span>
+      <div class="arrow-icon">➜</div>
+    </button>
+
+    <div class="msg-box" id="msgBox"></div>
+
+    <div class="vip-table">
+      <div class="vip-title">BẢNG GIÁ VIP</div>
+      <div class="vip-grid">
+        <div class="vip-item"><span>1 Ngày</span> <span class="vip-price">35K</span></div>
+        <div class="vip-item"><span>1 Tuần</span> <span class="vip-price">60K</span></div>
+        <div class="vip-item"><span>1 Tháng</span> <span class="vip-price">120K</span></div>
+        <div class="vip-item"><span>Vĩnh Viễn</span> <span class="vip-price">190K</span></div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step-item active"><div class="step-num">1</div> Nhập key</div>
+      <div class="step-line"></div>
+      <div class="step-item"><div class="step-num">2</div> Xác thực</div>
+      <div class="step-line"></div>
+      <div class="step-item"><div class="step-num">3</div> Vào game</div>
+    </div>
+
+    <div class="footer-link">
+      Chưa có key? <a href="https://t.me/cskhleminh" target="_blank">Liên hệ Telegram</a>
+    </div>
+  </div>
+</div>
+
+<!-- ROBOT WIDGETS -->
+<div class="robot-container" id="robotContainer" style="display:none;">
+  <div class="robot-widget" id="widget1">
+    <div class="robot-character">
+      <div class="robot-ear left"></div><div class="robot-ear right"></div>
+      <div class="robot-head">
+        <div class="robot-visor">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="18" fill="#38bdf8"/><circle cx="75" cy="25" r="18" fill="#38bdf8"/>
+            <circle cx="50" cy="55" r="40" fill="#7dd3fc"/><ellipse cx="50" cy="65" rx="18" ry="12" fill="#e0f2fe"/>
+            <circle cx="35" cy="48" r="5" fill="#0f172a"/><circle cx="65" cy="48" r="5" fill="#0f172a"/>
+            <ellipse cx="50" cy="60" rx="4" ry="3" fill="#0f172a"/><path d="M42 68 Q50 75 58 68" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="robot-neck"></div><div class="robot-body"></div>
+      <div class="robot-arm-right"></div><div class="robot-arm-left"></div>
+    </div>
+    <div class="glass-board">
+      <div class="board-phien" id="uiPhien1">#phiên : --</div>
+      <div class="board-du-doan" id="uiDuDoan1">Dự đoán : <span>...</span></div>
+    </div>
+  </div>
+
+  <div class="robot-widget" id="widget2">
+    <div class="robot-character">
+      <div class="robot-ear left"></div><div class="robot-ear right"></div>
+      <div class="robot-head">
+        <div class="robot-visor">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="25" cy="25" r="18" fill="#38bdf8"/><circle cx="75" cy="25" r="18" fill="#38bdf8"/>
+            <circle cx="50" cy="55" r="40" fill="#7dd3fc"/><ellipse cx="50" cy="65" rx="18" ry="12" fill="#e0f2fe"/>
+            <circle cx="35" cy="48" r="5" fill="#0f172a"/><circle cx="65" cy="48" r="5" fill="#0f172a"/>
+            <ellipse cx="50" cy="60" rx="4" ry="3" fill="#0f172a"/><path d="M42 68 Q50 75 58 68" stroke="#0f172a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="robot-neck"></div><div class="robot-body"></div>
+      <div class="robot-arm-right"></div><div class="robot-arm-left"></div>
+    </div>
+    <div class="glass-board">
+      <div class="board-phien" id="uiPhien2">#phiên : --</div>
+      <div class="board-du-doan" id="uiDuDoan2">Dự đoán : <span>...</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ⚠️ THAY BẰNG URL RENDER BACKEND CỦA BẠN
+const API_URL = 'https://lc79vipadmin-5orx.onrender.com';
+
+// Tạo device_id duy nhất cho trình duyệt
+function getDeviceId() {
+    let id = localStorage.getItem('bon_device_id');
+    if (!id) {
+        id = 'dev_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+        localStorage.setItem('bon_device_id', id);
+    }
+    return id;
+}
+
+const deviceId = getDeviceId();
+const keyScreen = document.getElementById('keyScreen');
+const keyInput = document.getElementById('keyInput');
+const msgBox = document.getElementById('msgBox');
+const submitBtn = document.getElementById('keySubmitBtn');
+const submitText = document.getElementById('submitText');
+const robotContainer = document.getElementById('robotContainer');
+
+// Nút Dán
+document.getElementById('pasteBtn').addEventListener('click', async () => {
+    try {
+        const text = await navigator.clipboard.readText();
+        keyInput.value = text.trim();
+    } catch (e) {
+        msgBox.innerHTML = '<span class="msg-error">Không thể dán. Vui lòng nhập tay.</span>';
+    }
+});
+
+// Xử lý nhập key
+submitBtn.addEventListener('click', async () => {
+    const key = keyInput.value.trim().toUpperCase();
+    if (!key) {
+        msgBox.innerHTML = '<span class="msg-error">Vui lòng nhập key!</span>';
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitText.innerHTML = '<span class="spinner"></span> Đang kiểm tra...';
+    msgBox.innerHTML = '';
+
+    try {
+        const res = await fetch(`${API_URL}/check-key?key=${encodeURIComponent(key)}&device_id=${encodeURIComponent(deviceId)}`);
+        const data = await res.json();
+
+        if (data.status) {
+            msgBox.innerHTML = '<span class="msg-success">✅ ' + data.message + '</span>';
+            setTimeout(() => {
+                keyScreen.classList.add('hidden');
+                document.getElementById('gameFrame').style.display = 'block';
+                robotContainer.style.display = 'flex';
+            }, 800);
+        } else {
+            msgBox.innerHTML = '<span class="msg-error">❌ ' + data.message + '</span>';
+            submitBtn.disabled = false;
+            submitText.textContent = 'VÀO HỆ THỐNG';
+        }
+    } catch (e) {
+        msgBox.innerHTML = '<span class="msg-error">Lỗi kết nối server!</span>';
+        submitBtn.disabled = false;
+        submitText.textContent = 'VÀO HỆ THỐNG';
+    }
+});
+
+// Nhấn Enter để gửi
+keyInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitBtn.click();
+});
+
+// ====== GIẢ LẬP DỰ ĐOÁN (demo) ======
+setInterval(() => {
+    const phien1 = Math.floor(Math.random() * 90000) + 10000;
+    const phien2 = Math.floor(Math.random() * 90000) + 10000;
+    document.getElementById('uiPhien1').textContent = '#phiên : ' + phien1;
+    document.getElementById('uiPhien2').textContent = '#phiên : ' + phien2;
+
+    const options = ['TÀI', 'XỈU'];
+    const d1 = options[Math.floor(Math.random() * 2)];
+    const d2 = options[Math.floor(Math.random() * 2)];
+    document.getElementById('uiDuDoan1').innerHTML = 'Dự đoán : <span>' + d1 + '</span>';
+    document.getElementById('uiDuDoan2').innerHTML = 'Dự đoán : <span>' + d2 + '</span>';
+}, 3000);
+</script>
+</body>
+</html>
