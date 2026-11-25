@@ -1,7 +1,7 @@
 {
   "name": "bon-tool-server",
   "version": "1.0.0",
-  "description": "Server quản lý key cho BON TOOL LC79",
+  "description": "API Server cho BON TOOL",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
